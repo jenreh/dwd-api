@@ -6,31 +6,32 @@ import csv
 
 class MosmixHandler:
 
-    def _open_mosmix_file(self, input_file: str):
+    @staticmethod
+    def open_mosmix_file(input_file: str) -> List[list]:
         """Opens mosmix station file
 
         :param input_file:
         :return:
         """
-        with open(input_file,'r') as mosmix_station_file:
-            list_of_stations: list = List[list]
-            stations: list = List[MosmixStation]
+        with open(input_file, 'r', encoding='utf-8') as mosmix_station_file:
+            list_of_stations: List[list] = []
+            stations: List[MosmixStation] = []
             for line in mosmix_station_file:
-                if not line:
+                if not line.strip():
                     metadata: str = None
-                    column_specs: dict = Dict[str:int]
-                    headers: list = List[str]
+                    column_specs: Dict[str, int] = {}
+                    headers: List[str] = {}
                     if stations:
                         list_of_stations.append(stations)
-                        stations: list = List[MosmixStation]
-                elif line.startswith('Table'):
+                        stations: List[MosmixStation] = []
+                elif line.startswith('TABLE'):
                     metadata = line
                 elif line.startswith('clu'):
                     headers = line.split()
                 elif line.startswith('=='):
-                    column_specs = self._create_column_specs(headers, line)
+                    column_specs = MosmixHandler._create_column_specs(headers, line)
                 else:
-                    station = self._create_mosmix_station_from_line(column_specs, line)
+                    station = MosmixHandler._create_mosmix_station_from_line(column_specs, line)
                     if station:
                         station.metadata = metadata
                         stations.append(station)
@@ -39,17 +40,17 @@ class MosmixHandler:
             return list_of_stations
 
     @staticmethod
-    def _create_column_specs(headers: List[str], line: str) -> Dict[str:int]:
+    def _create_column_specs(headers: List[str], line: str) -> Dict[str, int]:
         """Create a mapping of column name and column length
 
         :param headers:
         :param line:
         :return:
         """
-        column_specs: dict = Dict[str:int]
+        column_specs: Dict[str:int] = {}
         column_length_counters = line.split()
         for i in range(len(headers)):
-            column_specs[headers] = len(column_length_counters[i])
+            column_specs[headers[i]] = len(column_length_counters[i])
         return column_specs
 
     @staticmethod
@@ -63,7 +64,15 @@ class MosmixHandler:
         start_index = 0
         new_station = MosmixStation()
         for column_name, column_length in column_specs.items():
-            setattr(new_station, 'column_name', line[start_index:column_length])
+            column_end = start_index + column_length
+            if 'nb.' is column_name:
+                new_station.latitude = line[start_index:column_end].strip()
+            elif 'el.' is column_name:
+                new_station.longitude = line[start_index:column_end].strip()
+            elif 'elev' is column_name:
+                new_station.elevation = line[start_index:column_end].strip()
+            else:
+                setattr(new_station, column_name, line[start_index:column_end].strip())
             start_index += column_length + 1
         return new_station
 

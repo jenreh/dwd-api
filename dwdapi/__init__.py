@@ -1,8 +1,8 @@
 import logging
 from enum import Enum
+from dataclasses import dataclass
 
-logger = logging.getLogger('dwd-api')
-
+logger = logging.getLogger('dwdapi')
 
 class GeoType(Enum):
     """Enum representing geological location
