@@ -1,6 +1,5 @@
 import logging
 from enum import Enum
-from dataclasses import dataclass
 
 logger = logging.getLogger('dwdapi')
 
