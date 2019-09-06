@@ -1,5 +1,8 @@
 language: python
 python:
   - "3.6"
-script:
-  - python -m unittest discover -v -s ./tests
+
+jobs:
+  include:
+    - stage: unittest
+      script: python -m unittest discover -v -s ./tests
