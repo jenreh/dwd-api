@@ -8,7 +8,7 @@ class MyTestCase(unittest.TestCase):
         pass
 
     def test_open_mosmix_file(self):
-        list_of_stations = MosmixHandler.open_mosmix_file('resources/mosmix_stations.txt')
+        list_of_stations = MosmixHandler.open_mosmix_file('./tests/resources/mosmix_stations.txt')
         assert 0 < len(list_of_stations)
 
         for station_list in list_of_stations:
